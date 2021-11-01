@@ -1,6 +1,8 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "./systick.h"
+
 // The "practical" entrypoint for your program
 extern int main();
 
@@ -123,7 +125,7 @@ const struct isr_vectors interrupt_vector_table = {
     .sv_call = freeze,
     .reserved_debug = nullptr,
     .pend_sv = nullptr,
-    .systick = dummyHandler,
+    .systick = handleSystick,
     .pm = freeze,
     .sysctrl = freeze,
     .wdt = dummyHandler,

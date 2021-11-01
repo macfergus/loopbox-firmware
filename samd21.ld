@@ -21,6 +21,8 @@
 __ROM_BASE = 0x00000000;
 __ROM_SIZE = 0x00008000;
 
+__HEAP_SIZE = 0x00000000;
+
 __RAM_BASE = 0x20000000;
 __RAM_SIZE = 0x00001000;
 
@@ -143,6 +145,16 @@ SECTIONS
         __RamLimit = .;
     } > RAM AT > RAM
 
+    .heap (COPY):
+    {
+        . = ALIGN(8);
+        __end__ = .;
+        PROVIDE(end = .);
+        . = . + __HEAP_SIZE;
+        . = ALIGN(8);
+        __HeapLimit = .;
+    } > RAM
+
     .stack (ORIGIN(RAM) + LENGTH(RAM) - __STACK_SIZE) (COPY) :
     {
         . = ALIGN(8);
@@ -154,5 +166,5 @@ SECTIONS
     PROVIDE(__stack = __stack_top__);
 
     /* Check if data + heap + stack exceeds RAM limit */
-    ASSERT(__StackLimit >= __RamLimit, "Stack bumped into RAM")
+    ASSERT(__StackLimit >= __HeapLimit, "Stack bumped into heap")
 }

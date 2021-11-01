@@ -1,0 +1,4 @@
+loadbin build/loopbox.bin,0x0
+r
+go
+q

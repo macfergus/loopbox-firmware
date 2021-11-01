@@ -4,6 +4,7 @@ LD=arm-none-eabi-g++
 OBJCOPY=arm-none-eabi-objcopy
 
 CFLAGS=-g \
+    -Og \
     -D__SAMD21G15A__ \
     -Iinclude \
     -fdata-sections -ffunction-sections \
