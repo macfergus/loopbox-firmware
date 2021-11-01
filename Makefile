@@ -30,8 +30,12 @@ ELF=${BIN:.bin=.elf}
 MAP=$(ELF).map
 LDSCRIPT=samd21.ld
 
+DEPS=${OBJS:.o=.o.d}
+
 .PHONY: all
 all: $(BIN)
+
+-include $(DEPS)
 
 .PHONY: clean
 clean:
@@ -40,11 +44,11 @@ clean:
 
 $(CPP_OBJDIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -MMD -c $< -o $@ -MT $@ -MF $@.d
 
 $(C_OBJDIR)/%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -MMD -c $< -o $@ -MT $@ -MF $@.d
 
 $(ELF): $(OBJS) $(LDSCRIPT)
 	@mkdir -p $(dir $@)
