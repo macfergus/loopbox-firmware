@@ -1,7 +1,6 @@
-#include "samd.h"
-
-#include "./led.h"
-#include "./systick.h"
+#include "./loopbox/led.h"
+#include "./loopbox/systick.h"
+#include "./mcu/samd.h"
 
 int main() {
     initSystick(1000000);

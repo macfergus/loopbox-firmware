@@ -39,8 +39,9 @@ all: $(BIN)
 
 .PHONY: clean
 clean:
-	rm -f $(OBJS) $(ELF) $(BIN) $(MAP)
+	rm -f $(OBJS) $(ELF) $(BIN) $(MAP) $(DEPS)
 	find $(BUILDDIR) -name '*.o' -delete
+	find $(BUILDDIR) -name '*.d' -delete
 
 $(CPP_OBJDIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)

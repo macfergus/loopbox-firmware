@@ -1,8 +1,8 @@
 #ifndef __LOOPBOX_SYSTICK_H__
 #define __LOOPBOX_SYSTICK_H__
 
+#include "../mcu/samd.h"
 #include "./systick.h"
-#include "samd.h"
 
 volatile uint32_t systick_millis = 0;
 

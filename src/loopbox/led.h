@@ -1,7 +1,7 @@
 #ifndef __LOOPBOX_LED_H__
 #define __LOOPBOX_LED_H__
 
-#include "samd.h"
+#include "../mcu/samd.h"
 
 class LED {
 public:
