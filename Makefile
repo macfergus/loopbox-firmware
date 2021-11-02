@@ -7,6 +7,9 @@ CFLAGS=-g \
     -Og \
     -D__SAMD21G15A__ \
     -Iinclude \
+    -Itinyusb/src \
+    -Itinyusb/hw/mcu/microchip/samd21/include \
+    -Itinyusb/hw/mcu/microchip/samd21/CMSIS/Include \
     -fdata-sections -ffunction-sections \
     -mabi=aapcs -flto -mthumb -mcpu=cortex-m0plus
 CXXFLAGS=-std=c++20 $(CFLAGS)
@@ -20,7 +23,15 @@ C_OBJDIR=$(BUILDDIR)/c
 CPP_SRCS := $(shell find $(SRCDIR) -name '*.cpp')
 CPP_OBJS := $(addprefix $(CPP_OBJDIR)/,${CPP_SRCS:.cpp=.o})
 
-C_SRCS=
+TINYUSB_SRCS=\
+    tinyusb/src/tusb.c \
+    tinyusb/src/class/midi/midi_device.c \
+    tinyusb/src/common/tusb_fifo.c \
+    tinyusb/src/device/usbd.c \
+    tinyusb/src/device/usbd_control.c \
+    tinyusb/src/portable/microchip/samd/dcd_samd.c
+
+C_SRCS=$(TINYUSB_SRCS)
 C_OBJS=$(addprefix $(C_OBJDIR)/,${C_SRCS:.c=.o})
 
 OBJS=$(CPP_OBJS) $(C_OBJS)
