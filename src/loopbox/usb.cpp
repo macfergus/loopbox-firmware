@@ -53,6 +53,20 @@ void initUSBClock() {
         GCLK_GENCTRL_GENEN |
         GCLK_GENCTRL_IDC;
     while (GCLK->STATUS & GCLK_STATUS_SYNCBUSY) {}
+
+    // Enable the APB/AHB bus clocks
+    PM->APBBMASK = PM->APBBMASK | PM_APBBMASK_USB_ENABLE;
+    PM->AHBMASK = PM->AHBMASK | PM_AHBMASK_USB_ENABLE;
+}
+
+void usbReset() {
+    USB->CTRLA = USB_CTRLA_SWRST;
+    while (USB->SYNCBUSY & USB_SYNCBUSY_SWRST) {}
+}
+
+void usbEnable() {
+    USB->CTRLA = USB_CTRLA_ENABLE;
+    while (USB->SYNCBUSY & USB_SYNCBUSY_ENABLE) {}
 }
 
 size_t my_strlen(char const* s) {

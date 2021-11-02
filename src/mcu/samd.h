@@ -4,7 +4,9 @@
 #include "./arm_systick.h"
 #include "./gclk.h"
 #include "./nvm.h"
+#include "./pm.h"
 #include "./port.h"
+#include "./samd_usb.h"
 #include "./serial.h"
 #include "./sysctrl.h"
 

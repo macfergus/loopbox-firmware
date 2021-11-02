@@ -10,6 +10,8 @@ int main() {
     initSystick(48000000);
     LED led(PORTA, 22);
 
+    usbReset();
+    usbEnable();
     tusb_init();
 
     while (true) {
