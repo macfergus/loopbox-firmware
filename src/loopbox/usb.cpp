@@ -57,6 +57,12 @@ void initUSBClock() {
     // Enable the APB/AHB bus clocks
     PM->APBBMASK = PM->APBBMASK | PM_APBBMASK_USB_ENABLE;
     PM->AHBMASK = PM->AHBMASK | PM_AHBMASK_USB_ENABLE;
+
+    // Route clock generator 0 to the USB peripheral and enable it
+    GCLK->CLKCTRL =
+        GCLK_CLKCTRL_ID_USB |
+        GCLK_CLKCTRL_GEN0 |
+        GCLK_CLKCTRL_CLKEN;
 }
 
 void usbReset() {
@@ -67,6 +73,16 @@ void usbReset() {
 void usbEnable() {
     USB->CTRLA = USB_CTRLA_ENABLE;
     while (USB->SYNCBUSY & USB_SYNCBUSY_ENABLE) {}
+}
+
+void initUSBPins() {
+    const uint32_t pin_dm = 24;
+    const uint32_t pin_dp = 25;
+    PORTA->DIRSET = (1 << pin_dm);
+    PORTA->DIRSET = (1 << pin_dp);
+    PORTA->PINCFG[pin_dm] = PORT_PINCFG_INEN | PORT_PINCFG_PMUXEN;
+    PORTA->PINCFG[pin_dp] = PORT_PINCFG_INEN | PORT_PINCFG_PMUXEN;
+    PORTA->PMUX[12] = (PORT_PMUX_G << 4) | PORT_PMUX_G;
 }
 
 size_t my_strlen(char const* s) {
@@ -205,4 +221,8 @@ uint8_t const descriptor_conf[] = {
 
 uint8_t const* tud_descriptor_configuration_cb(uint8_t index) {
     return reinterpret_cast<uint8_t const*>(&descriptor_conf);
+}
+
+void handleUSB() {
+    tud_int_handler(0);
 }

@@ -17,4 +17,8 @@ const uint32_t GCLK_GENCTRL_SRC_DFLL48M = 7 << 8;
 const uint32_t GCLK_GENCTRL_GENEN = 1 << 16;
 const uint32_t GCLK_GENCTRL_IDC = 1 << 17;
 
+const uint16_t GCLK_CLKCTRL_CLKEN = 1 << 14;
+const uint16_t GCLK_CLKCTRL_GEN0 = 0 << 8;
+const uint16_t GCLK_CLKCTRL_ID_USB = 6 << 0;
+
 #endif

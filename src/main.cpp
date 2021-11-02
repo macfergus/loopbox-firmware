@@ -12,14 +12,24 @@ int main() {
 
     usbReset();
     usbEnable();
+    initUSBPins();
     tusb_init();
 
+    bool led_state = false;
+    uint32_t last_change = millis();
     while (true) {
         tud_task();
 
-        led.turnOn();
-        delayMillis(500);
-        led.turnOff();
-        delayMillis(500);
+        uint32_t now = millis();
+        if (now - last_change >= 500) {
+            if (led_state) {
+                led.turnOff();
+                led_state = false;
+            } else {
+                led.turnOn();
+                led_state = true;
+            }
+            last_change = now;
+        }
     }
 }

@@ -10,4 +10,10 @@ void initUSBClock();
 void usbReset();
 void usbEnable();
 
+/** Configure the USB D+/D- pins */
+void initUSBPins();
+
+/** USB interrupt handler */
+void handleUSB();
+
 #endif

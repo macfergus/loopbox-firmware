@@ -24,5 +24,8 @@ struct portctl {
 };
 #define PORTA ((volatile struct portctl*)(0x41004400))
 #define PORTB ((volatile struct portctl*)(0x41004480))
+const uint8_t PORT_PINCFG_INEN = 1 << 1;
+const uint8_t PORT_PINCFG_PMUXEN = 1 << 0;
+const uint8_t PORT_PMUX_G = 0x6;
 
 #endif

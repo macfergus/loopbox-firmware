@@ -2,6 +2,7 @@
 #include <cstdint>
 
 #include "./systick.h"
+#include "./usb.h"
 
 // The "practical" entrypoint for your program
 extern int main();
@@ -133,6 +134,6 @@ const struct isr_vectors interrupt_vector_table = {
     .eic = dummyHandler,
     .nvmctrl = dummyHandler,
     .dmac = dummyHandler,
-    .usb = dummyHandler,
+    .usb = handleUSB,
     .evsys = dummyHandler,
 };
