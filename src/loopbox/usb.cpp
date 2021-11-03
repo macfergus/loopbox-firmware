@@ -1,5 +1,6 @@
 #include <cstddef>
 #include <cstdint>
+#include <span>
 
 #include "tusb.h"
 
@@ -85,22 +86,6 @@ void initUSBPins() {
     PORTA->PMUX[12] = (PORT_PMUX_G << 4) | PORT_PMUX_G;
 }
 
-size_t my_strlen(char const* s) {
-    size_t count = 0;
-    while (*(s + count) != 0) {
-        ++count;
-    }
-    return count;
-}
-
-template<typename T>
-T max(T first, T second) {
-    if (first > second) {
-        return first;
-    }
-    return second;
-}
-
 uint8_t to_hex(uint8_t x) {
     if (x < 10) {
         return '0' + x;
@@ -111,36 +96,49 @@ uint8_t to_hex(uint8_t x) {
     return '.';
 }
 
-/** out must contain 8 bytes of memory */
-void word_to_hex(uint32_t word, char* out) {
-    for (int nibble = 0; nibble < 8; ++nibble) {
-        out[nibble] = to_hex(word & 0xf);
+auto word_to_hex(uint32_t word, std::span<char> out) {
+    uint32_t n_nibbles = 0;
+    auto p_out = out.begin();
+    const auto end = out.end();
+    while (p_out != end && n_nibbles < 8) {
+        *p_out = to_hex(word & 0xf);
         word = word >> 4;
+        ++p_out;
+        ++n_nibbles;
     }
+    return p_out;
 }
 
-void get_serial_hex(char* out, size_t n_bytes) {
+void get_serial_hex(std::span<char> out) {
+    for (auto& x : out) {
+        x = 0;
+    }
+    // save room for null terminator
+    auto buf = out.first(out.size() - 1);
+    auto p_out = buf.begin();
     uint32_t serial[4];
     read_chip_serial(serial);
 
-    size_t i = 0;
-    size_t j = 0;
-    for (j = 0; j < 4 && n_bytes >= 9; ++j) {
-        word_to_hex(serial[j], out + i);
-        n_bytes -= 8;
-        i += 8;
-    }
-    out[i] = 0;
+    p_out = word_to_hex(serial[0], {p_out, buf.end()});
+    p_out = word_to_hex(serial[1], {p_out, buf.end()});
+    p_out = word_to_hex(serial[2], {p_out, buf.end()});
+    p_out = word_to_hex(serial[3], {p_out, buf.end()});
 }
 
-void pack_descriptor_string(char const* in, uint16_t* out, size_t bufsize) {
-    const auto in_size = my_strlen(in);
-    // First word of the buffer is reserved for ID & length
-    const auto size = max(in_size, bufsize - 1);
-    out[0] = (TUSB_DESC_STRING << 8) | (2 * (size + 1));
-    for (size_t i = 0; i < size; ++i) {
-        out[i + 1] = uint16_t(in[i]);
+/** Convert an ascii string to utf-16 and add descriptor header */
+void pack_descriptor_string(char const* in, std::span<uint16_t> out) {
+    char const* p = in;
+    // Skip the first byte for the string length
+    auto q = std::next(out.begin());
+    size_t n_bytes = 0;
+    const auto end = out.end();
+    while ((*p != 0) && (q != end) && n_bytes < 254) {
+        *q = uint16_t(*p);
+        ++p;
+        ++q;
+        n_bytes += 2;
     }
+    out.front() = (TUSB_DESC_STRING << 8) | (n_bytes + 2);
 }
 
 const size_t DESC_BUF_SIZE = 33;
@@ -157,11 +155,11 @@ uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid) {
 
     language_descriptor[0] = (TUSB_DESC_STRING << 8) | 2;
     language_descriptor[1] = 0x0409; // english
-    pack_descriptor_string("LoopBox", mfr_descriptor, DESC_BUF_SIZE);
-    pack_descriptor_string("LoopBox", product_descriptor, DESC_BUF_SIZE);
+    pack_descriptor_string("LoopBox", mfr_descriptor);
+    pack_descriptor_string("LoopBox", product_descriptor);
     char serial[DESC_BUF_SIZE];
-    get_serial_hex(serial, DESC_BUF_SIZE);
-    pack_descriptor_string(serial, serial_descriptor, DESC_BUF_SIZE);
+    get_serial_hex(serial);
+    pack_descriptor_string(serial, serial_descriptor);
 
     if (index == 0) {
         return language_descriptor;
