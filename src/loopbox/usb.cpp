@@ -116,13 +116,12 @@ void get_serial_hex(std::span<char> out) {
     // save room for null terminator
     auto buf = out.first(out.size() - 1);
     auto p_out = buf.begin();
-    uint32_t serial[4];
-    read_chip_serial(serial);
+    const auto serial = read_chip_serial();
 
-    p_out = word_to_hex(serial[0], {p_out, buf.end()});
-    p_out = word_to_hex(serial[1], {p_out, buf.end()});
-    p_out = word_to_hex(serial[2], {p_out, buf.end()});
-    p_out = word_to_hex(serial[3], {p_out, buf.end()});
+    p_out = word_to_hex(serial.word1, {p_out, buf.end()});
+    p_out = word_to_hex(serial.word2, {p_out, buf.end()});
+    p_out = word_to_hex(serial.word3, {p_out, buf.end()});
+    p_out = word_to_hex(serial.word4, {p_out, buf.end()});
 }
 
 /** Convert an ascii string to utf-16 and add descriptor header */
