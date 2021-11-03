@@ -17,12 +17,27 @@ int main() {
     tusb_init();
 
     MIDI midi;
-    MIDIButton button{midi, PORTA, 7, 27};
+    MIDIButton buttons[] = {
+        {midi, PORTA, 0, 24},
+        {midi, PORTA, 1, 25},
+        {midi, PORTA, 6, 26},
+        {midi, PORTA, 7, 27},
+        {midi, PORTA, 27, 28},
+        {midi, PORTA, 28, 29},
+        {midi, PORTB, 2, 30},
+        {midi, PORTB, 3, 31},
+        {midi, PORTA, 20, 32},
+        {midi, PORTA, 21, 33},
+        {midi, PORTB, 22, 34},
+        {midi, PORTB, 23, 35},
+    };
 
     while (true) {
         tud_task();
 
         const uint32_t now = millis();
-        button.process(now);
+        for (auto& button : buttons) {
+            button.process(now);
+        }
     }
 }
