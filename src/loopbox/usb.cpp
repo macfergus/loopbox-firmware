@@ -7,6 +7,25 @@
 #include "../mcu/samd.h"
 #include "./usb.h"
 
+const size_t MAX_DESCRIPTOR_LENGTH = 126;
+
+template<size_t N>
+struct USBDescriptor {
+    constexpr USBDescriptor(char16_t const (&data)[N]) :
+        n_bytes(2 * (N - 1) + 2),
+        type(TUSB_DESC_STRING) {
+
+        static_assert(N <= MAX_DESCRIPTOR_LENGTH, "descriptor is too long");
+        for (size_t i = 0; i < N - 1; ++i) {
+            characters[i] = data[i];
+        }
+    }
+
+    uint8_t n_bytes;
+    uint8_t type;
+    char16_t characters[N - 1];
+};
+
 void waitClockReady() {
     while (!(SYSCTRL->PCLKSR & SYSCTRL_PCLKSR_DFLLRDY)) {
     }
@@ -141,9 +160,12 @@ void pack_descriptor_string(char const* in, std::span<uint16_t> out) {
 }
 
 const size_t DESC_BUF_SIZE = 33;
-uint16_t language_descriptor[2];
-uint16_t mfr_descriptor[DESC_BUF_SIZE];
-uint16_t product_descriptor[DESC_BUF_SIZE];
+const uint16_t language_descriptor[2] = {
+    (TUSB_DESC_STRING << 8) | 4, // length + type
+    0x0409 // english
+};
+constexpr USBDescriptor mfr_descriptor = { u"LoopBox" };
+constexpr USBDescriptor product_descriptor = { u"LoopBox" };
 uint16_t serial_descriptor[DESC_BUF_SIZE];
 uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid) {
     // index:
@@ -152,10 +174,6 @@ uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid) {
     // 2 -- product
     // 3 -- serial
 
-    language_descriptor[0] = (TUSB_DESC_STRING << 8) | 2;
-    language_descriptor[1] = 0x0409; // english
-    pack_descriptor_string("LoopBox", mfr_descriptor);
-    pack_descriptor_string("LoopBox", product_descriptor);
     char serial[DESC_BUF_SIZE];
     get_serial_hex(serial);
     pack_descriptor_string(serial, serial_descriptor);
@@ -163,9 +181,9 @@ uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid) {
     if (index == 0) {
         return language_descriptor;
     } else if (index == 1) {
-        return mfr_descriptor;
+        return reinterpret_cast<uint16_t const*>(&mfr_descriptor);
     } else if (index == 2) {
-        return product_descriptor;
+        return reinterpret_cast<uint16_t const*>(&product_descriptor);
     } else if (index == 3) {
         return serial_descriptor;
     }
